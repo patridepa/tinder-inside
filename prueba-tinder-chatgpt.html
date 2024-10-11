@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CreaTinder - Encuentra tu dupla creativa perfecta</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #000000;
+            color: #ffffff;
+        }
+        h1, h2 {
+            color: #ffff00;
+            text-align: center;
+        }
+        .container {
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(255,255,255,0.1);
+        }
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+        button {
+            background-color: #ffff00;
+            color: #000000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #ffff66;
+        }
+        #result {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+        }
+        #progress {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #ffff00;
+        }
+        #match-range {
+            font-size: 18px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        #start-button {
+            display: block;
+            margin: 20px auto;
+            font-size: 18px;
+        }
+        /* Barra de progreso visual */
+        .progress-bar {
+            width: 100%;
+            background-color: #333;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 20px;
+            width: 0;
+            background-color: #ffff00;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <h1>CreaTinder - Encuentra tu dupla creativa perfecta</h1>
+    
+    <div id="start-screen" class="container">
+        <h2>Bienvenido a CreaTinder</h2>
+        <p>Este test te ayudará a encontrar tu dupla creativa ideal. Responde a 22 preguntas sobre tus preferencias y estilo de trabajo en publicidad.</p>
+        <p>Al final, recibirás una puntuación de compatibilidad y un rango para emparejarte con otros estudiantes.</p>
+        <button id="start-button" onclick="startQuiz()">Empezar Test</button>
+    </div>
+
+    <div id="quiz-container" style="display: none;">
+        <div id="progress">
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="progress-bar-fill"></div>
+            </div>
+            Pregunta <span id="current-question">1</span> de 22
+        </div>
+        <div id="quiz" class="container">
+            <!-- Las preguntas se generarán dinámicamente con JavaScript -->
+        </div>
+    </div>
+
+    <div id="result-container" class="container" style="display: none;">
+        <h2>Tu resultado</h2>
+        <div id="result"></div>
+        <div id="match-range"></div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál es tu rol principal?",
+                options: ["Copy", "Arte", "No lo tengo claro"],
+                scores: [0, 0, 0]
+            },
+            {
+                question: "¿Cómo afrontas un proyecto publicitario con plazos ajustados?",
+                options: ["Lo organizo detalladamente antes de empezar.", "Me enfoco en los detalles para asegurar la calidad.", "Colaboro con el equipo para buscar soluciones.", "Trato de inspirar a todos para mantener la motivación."],
+                scores: [10, 7, 5, 3]
+            },
+            {
+                question: "Cuando trabajas en equipo, ¿qué rol sueles asumir?",
+                options: ["Líder, me gusta dirigir la estrategia.", "Creativo, soy quien aporta ideas nuevas.", "Ejecutor, me aseguro de que todo se haga a tiempo.", "Mediador, facilito la comunicación entre todos."],
+                scores: [9, 6, 4, 2]
+            },
+            {
+                question: "¿Qué tipo de contenido prefieres crear?",
+                options: ["Diseños visualmente impactantes.", "Historias que emocionen.", "Mensajes claros y directos.", "Contenidos experimentales e innovadores."],
+                scores: [10, 8, 5, 6]
+            },
+            {
+                question: "En un brainstorming, tu enfoque es:",
+                options: ["Generar ideas lo más rápido posible.", "Pulir las ideas que se han propuesto.", "Escuchar y aportar en segundo plano.", "Proponer ideas fuera de lo común."],
+                scores: [8, 5, 3, 10]
+            },
+            {
+                question: "¿Cuál es tu fuente principal de inspiración creativa?",
+                options: ["Arte y diseño contemporáneo.", "Música, cine y cultura pop.", "Las experiencias cotidianas.", "Tecnología e innovación."],
+                scores: [8, 6, 4, 9]
+            },
+            {
+                question: "¿Qué valoras más en una campaña publicitaria?",
+                options: ["El impacto visual que tiene.", "El mensaje emocional que transmite.", "Su efectividad en cumplir objetivos.", "Su originalidad y frescura."],
+                scores: [10, 8, 6, 7]
+            },
+            {
+                question: "¿Cómo prefieres recibir feedback?",
+                options: ["De manera directa y sin rodeos.", "De manera constructiva y con ejemplos.", "Con pasos claros para mejorar.", "En privado, para reflexionar mejor."],
+                scores: [9, 7, 4, 6]
+            },
+            {
+                question: "¿Qué tipo de cliente te entusiasma más?",
+                options: ["Marcas de lujo y alto perfil.", "Startups que buscan innovar.", "ONGs con causas sociales importantes.", "Empresas tecnológicas y disruptivas."],
+                scores: [10, 8, 6, 7]
+            },
+            {
+                question: "¿Cuál es tu estilo de vida fuera del trabajo?",
+                options: ["Me encanta descubrir nuevas culturas y tendencias.", "Soy aventurero y siempre busco nuevas experiencias.", "Me gusta llevar una vida tranquila y estable.", "Me rodeo de amigos y personas con intereses similares."],
+                scores: [9, 7, 3, 5]
+            },
+            {
+                question: "¿Qué tipo de contenido consumes más en tu tiempo libre?",
+                options: ["Arte, fotografía y diseño gráfico.", "Series, películas y narrativa visual.", "Noticias, documentales y temas de actualidad.", "Tecnología, gaming e innovación."],
+                scores: [9, 8, 5, 7]
+            },
+            {
+                question: "En términos de cultura popular, ¿qué te define mejor?",
+                options: ["Soy un fanático del cine independiente.", "Me encanta la música alternativa.", "Disfruto de la lectura y la literatura.", "La ciencia ficción y la tecnología son mis favoritos."],
+                scores: [9, 7, 5, 8]
+            },
+            {
+                question: "¿Cómo prefieres que sea tu lugar de trabajo ideal?",
+                options: ["Minimalista y ordenado.", "Creativo y lleno de inspiración.", "Funcional y eficiente.", "Flexible y adaptable."],
+                scores: [8, 10, 6, 5]
+            },
+            {
+                question: "¿Qué actitud tienes frente a los errores en un proyecto?",
+                options: ["Aprendo de los errores y sigo adelante.", "Intento evitarlos a toda costa.", "Me afectan, pero trato de seguir adelante.", "Los veo como oportunidades para mejorar."],
+                scores: [7, 5, 4, 9]
+            },
+            {
+                question: "¿Qué habilidad te gustaría desarrollar más en publicidad?",
+                options: ["Mejorar mis habilidades en diseño gráfico.", "Desarrollar estrategias creativas.", "Gestionar proyectos con más eficiencia.", "Incorporar más innovación digital."],
+                scores: [10, 8, 6, 7]
+            },
+            {
+                question: "En un equipo de trabajo, ¿cómo gestionas los conflictos?",
+                options: ["Media entre las partes involucradas.", "Propongo soluciones colaborativas.", "Evito conflictos cuando es posible.", "Escucho y trato de entender ambas partes."],
+                scores: [7, 8, 4, 5]
+            },
+            {
+                question: "¿Cómo prefieres abordar una tarea creativa difícil?",
+                options: ["Analizo todas las opciones antes de empezar.", "Me dejo llevar por la intuición.", "Investigo para encontrar inspiración.", "Trabajo en equipo para encontrar la mejor solución."],
+                scores: [8, 7, 9, 6]
+            },
+            {
+                question: "¿Qué importancia le das a la innovación en tus campañas?",
+                options: ["Es lo más importante para mí.", "Es relevante, pero no esencial.", "Depende del tipo de campaña.", "Prefiero enfoques más tradicionales."],
+                scores: [10, 7, 5, 4]
+            },
+            {
+                question: "¿Cómo manejas la presión en proyectos grandes?",
+                options: ["Me motiva a dar lo mejor de mí.", "Me estreso, pero siempre lo supero.", "Busco apoyo en mi equipo.", "Prefiero evitar la presión cuando puedo."],
+                scores: [9, 6, 5, 4]
+            },
+            {
+                question: "¿Cómo te sientes respecto a la ética en publicidad?",
+                options: ["Es muy importante que las campañas sean éticas.", "Es relevante, pero depende del contexto.", "La ética es secundaria si el cliente está satisfecho.", "No es un factor relevante en mi trabajo."],
+                scores: [10, 7, 5, 3]
+            },
+            {
+                question: "¿Qué tipo de proyectos te emocionan más?",
+                options: ["Campañas innovadoras y de alto impacto.", "Proyectos con impacto social positivo.", "Proyectos con resultados rápidos y eficientes.", "Proyectos creativos, aunque no tengan un gran impacto."],
+                scores: [10, 8, 6, 7]
+            }
+        ];
+
+        let answers = {};
+        let currentQuestion = 0;
+        let totalScore = 0;
+
+        function startQuiz() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('quiz-container').style.display = 'block';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const quizContainer = document.getElementById('quiz');
+            const question = questions[currentQuestion];
+            let html = `
+                <div class="question">
+                    <h3>${question.question}</h3>
+                    <div class="options">
+                        ${question.options.map((option, index) => `
+                            <button onclick="selectOption(${index})">${option}</button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            quizContainer.innerHTML = html;
+            document.getElementById('current-question').textContent = currentQuestion + 1;
+            updateProgressBar();
+        }
+
+        function selectOption(optionIndex) {
+            totalScore += questions[currentQuestion].scores[optionIndex];
+            currentQuestion++;
+
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function updateProgressBar() {
+            const progressBarFill = document.getElementById('progress-bar-fill');
+            const progress = (currentQuestion / questions.length) * 100;
+            progressBarFill.style.width = `${progress}%`;
+        }
+
+        function showResult() {
+            document.getElementById('quiz-container').style.display = 'none';
+            const resultContainer = document.getElementById('result-container');
+            const result = document.getElementById('result');
+            const matchRange = document.getElementById('match-range');
+            resultContainer.style.display = 'block';
+
+            // Obtener tipo de publicitario según el baremo
+            let tipoPublicitario;
+            if (totalScore >= 20 && totalScore <= 40) {
+                tipoPublicitario = "Visionario Creativo";
+            } else if (totalScore >= 41 && totalScore <= 60) {
+                tipoPublicitario = "Estratega Pragmático";
+            } else if (totalScore >= 61 && totalScore <= 80) {
+                tipoPublicitario = "Comunicador Emocional";
+            } else if (totalScore >= 81 && totalScore <= 100) {
+                tipoPublicitario = "Innovador Digital";
+            } else if (totalScore >= 101 && totalScore <= 120) {
+                tipoPublicitario = "Realista Metódico";
+            } else if (totalScore >= 121 && totalScore <= 140) {
+                tipoPublicitario = "Explorador Cultural";
+            } else if (totalScore >= 141 && totalScore <= 160) {
+                tipoPublicitario = "Narrador Inspirador";
+            } else if (totalScore >= 161 && totalScore <= 200) {
+                tipoPublicitario = "Experto en Tendencias";
+            }
+
+            // Añadir el rol principal que seleccionó el usuario en la primera pregunta
+            const rolPrincipal = questions[0].options[answers[0]];
+
+            result.innerHTML = `Tu resultado es: ${tipoPublicitario} - ${rolPrincipal}`;
+            matchRange.innerHTML = `Tu puntuación total es de ${totalScore} puntos.`;
+        }
+    </script>
+</body>
+</html>
